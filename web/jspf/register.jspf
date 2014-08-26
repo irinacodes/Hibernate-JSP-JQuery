@@ -1,0 +1,36 @@
+<%@ page pageEncoding="UTF-8" %>
+<script>
+$(function() {
+    $("#reg").validate({
+        rules: {
+            pwd: {
+                required: true,
+            },
+            newpwd: {
+                required: true,
+                minlength: 5
+            },
+            newpwdconfirm: {
+                required: true,
+                minlength: 5
+            },
+            
+        },
+        messages: {
+            pwd: {
+                required: "<fmt:message key="ENTER_PASSWORD"/>"   
+            },
+            newpwd: {
+                required: "<fmt:message key="ENTER_PASSWORD"/>",
+                minlength: "<fmt:message key="5_PASSWORD"/>"
+            },
+            newpwdconfirm: {
+                required: "<fmt:message key="ENTER_PASSWORD"/>",
+                minlength: "<fmt:message key="5_PASSWORD"/>"
+            },
+        }
+    });
+});
+</script>
+
+

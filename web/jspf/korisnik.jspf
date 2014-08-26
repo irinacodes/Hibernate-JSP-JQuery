@@ -1,0 +1,87 @@
+<%@ page pageEncoding="UTF-8" %>
+<script>
+$(function() {
+    $("#odsek").multiselect({
+        header: false,
+        checkAllText: "<fmt:message key="CHOOSE_ALL"/>",
+        uncheckAllText: "<fmt:message key="CANCEL_ALL"/>",
+        selectedText: "<fmt:message key="CHOSEN"/> #",
+        noneSelectedText: "<fmt:message key="CHOOSE"/>"
+
+    });
+    $("#zvanje").multiselect({
+        multiple: false,
+        header: false,
+        noneSelectedText: "<fmt:message key="CHOOSE"/>",
+        selectedList: 1
+    });
+    $("#godstudija").multiselect({
+        multiple: false,
+        header: false,
+        noneSelectedText: "<fmt:message key="CHOOSE"/>",
+        selectedList: 1
+    });
+
+    $("#signup").validate({
+        rules: {
+            ime: {
+                required: true
+            },
+            prezime: {
+                required: true
+            },
+            username: {
+                required: true,
+                minlength: 4
+            },
+            pwd: {
+                required: true,
+                minlength: 5
+            },
+            email: {
+                required: true,
+                email: true
+            },
+            zvanje: {
+                required: true
+            }
+        },
+        messages: {
+            username: {
+                required: "<fmt:message key="ENTER_USERNAME"/>",
+                minlength: "<fmt:message key="4_USERNAME"/>"
+            },
+            pwd: {
+                required: "<fmt:message key="ENTER_PASSWORD"/>",
+                minlength: "<fmt:message key="5_PASSWORD"/>"
+            },
+            ime: {
+                required: "<fmt:message key="ENTER_NAME"/>",
+            },
+            prezime: {
+                required: "<fmt:message key="ENTER_SURNAME"/>",
+            },
+            zvanje: {
+                required: "<fmt:message key="CHOOSE_TITLE"/>",
+            },
+            email: "<fmt:message key="ENTER_VALID_EMAIL"/>",
+        }
+    });
+    
+    
+        var zvanje = $('#zvanje');
+        if(zvanje.val() !== '5')
+            $('.showhide').hide();
+        zvanje.change(function(){
+            if($(this).val()==='5'){
+                $('.showhide').show();
+            }else{
+                $('.showhide').hide();
+            }
+        });
+
+
+});
+</script>
+
+

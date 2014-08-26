@@ -1,0 +1,33 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<c:if test="${korisnik ne null}">
+    <div class="ui-state-highlight ui-corner-all">
+        <ul class="ui-menu">
+            <c:choose>
+                <c:when test="${korisnik.admin}">              
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=korisnici"><fmt:message key="USERS"/></a></li>
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=dodelipredmet"><fmt:message key="COURSE_ASSIGNMENT"/></a></li>
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=labvezbe"><fmt:message key="EXERCISES"/></a></li>
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=aktivnosti"><fmt:message key="EXERCISE_ACT"/></a></li>
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=odseci"><fmt:message key="DEPARTMENTS"/></a></li>
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=predmeti"><fmt:message key="COURSES"/></a></li>
+                </c:when>
+                <c:when test="${korisnik.instructor}">      
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=mojipredmeti"><fmt:message key="COURSES"/></a></li>
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=mojevezbe"><fmt:message key="EXERCISES"/></a></li>
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=demonstratori"><fmt:message key="DEMONSTRATORS"/></a></li>     
+                </c:when>
+                <c:otherwise>
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=demohome"><fmt:message key="HOME"/></a></li>
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=dodelipredmet"><fmt:message key="CHOOSE_COURSES"/></a></li>
+                    <li class="ui-menu-item"><a href="CommandServlet?cmd=prijavademo"><fmt:message key="EXERCISE_CALLS"/></a></li>
+                </c:otherwise>
+            </c:choose>
+
+            <li class="ui-menu-item"><a href="CommandServlet?cmd=promenilozinku"><fmt:message key="EDIT_PWD"/></a></li>
+            <li class="ui-menu-item"><a href="CommandServlet?cmd=logout"><fmt:message key="LOGOUT"/></a></li>
+            
+            <li class="ui-menu-item"><a href="CommandServlet?cmd=promenijezik&lang=sr"><img src="img/sr.gif"/></a></li>
+            <li class="ui-menu-item"><a href="CommandServlet?cmd=promenijezik&lang=en"><img src="img/uk.gif"/></a></li>
+        </ul>
+    </div>
+</c:if>

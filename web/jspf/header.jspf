@@ -1,0 +1,5 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<div class="ui-widget-header ui-corner-all" style="text-align: center">
+    <h3><fmt:message key="HEADER"/> - <fmt:message key="PROGRAMMING_SYSTEMS"/></h3>      
+</div>
+

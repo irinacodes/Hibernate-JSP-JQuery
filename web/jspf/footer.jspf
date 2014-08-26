@@ -1,0 +1,4 @@
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<div class="ui-widget-header ui-corner-all" style="text-align:center">
+    <h4><fmt:message key="COPYRIGHT"/>&nbsp;<fmt:message key="PROGRAMMING_SYSTEMS"/>&nbsp;2014</h4>
+</div>
