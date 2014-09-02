@@ -1,11 +1,15 @@
 package homework.model;
 
+import homework.util.ConversionUtils;
 import homework.util.HibernateUtil;
 import homework.util.Validate;
 import java.io.Serializable;
 import java.util.*;
 import javax.persistence.*;
+
+import org.hibernate.*;
 import org.hibernate.Query;
+import org.hibernate.criterion.Restrictions;
 
 /**
  *
@@ -38,29 +42,28 @@ public class User {
     private Boolean admin = false;
     @Column(name = "aktivan")
     private Boolean active = false;
-    
+
     //one-to-many veza
     @ManyToOne
     @JoinColumn(name = "zvanjeid")
     private Title title;
-    
+
     //many-to-many veze
     //kada čuvamo korisnika, čuvamo i njegove predmete i odseke (cascade save - update)
-    
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "KORISNIK_ODSEK",
             joinColumns = {
-        @JoinColumn(name = "korisnikid")},
+                    @JoinColumn(name = "korisnikid")},
             inverseJoinColumns = {
-        @JoinColumn(name = "odsekid")})
+                    @JoinColumn(name = "odsekid")})
     private Set<Department> departments = new HashSet<Department>();
-    
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "KORISNIK_PREDMET",
             joinColumns = {
-        @JoinColumn(name = "korisnikid")},
+                    @JoinColumn(name = "korisnikid")},
             inverseJoinColumns = {
-        @JoinColumn(name = "predmetid")})
+                    @JoinColumn(name = "predmetid")})
     private Set<Course> courses = new HashSet<Course>();
 
     public User() {
@@ -209,7 +212,7 @@ public class User {
     public void addDepartment(Serializable departmentId) {
         departments.add(HibernateUtil.load(Department.class, departmentId));
     }
-    
+
     public void clearDepartments() {
         departments.clear();
     }
@@ -248,56 +251,88 @@ public class User {
         return (User) query.uniqueResult();
     }
 
-    //pretraživanje korisnika po više kriterijuma
-    public static List<User> find(String name, String surname, String[] titleIds, 
-            String[] courseIds, boolean demonstratorsOnly) {
+    //primer korišćenja Hibernate Criteria API za složene upite
+    public static List<User> find(String name, String surname, String[] titleIds,
+                                  String[] courseIds, boolean demonstratorsOnly) {
 
-        boolean allEmpty = !Validate.exists(name) && !Validate.exists(surname) 
-                && courseIds == null && titleIds == null;
-        String hql = "select user from User user ";
+        Criteria criteria = HibernateUtil.createCriteria(User.class)
+                .createAlias("courses", "c")
+                .createAlias("title", "t");
 
-        if (!allEmpty) {
-            StringBuilder conditionalHql = new StringBuilder();
-            if (courseIds != null) {
-                hql += " join user.courses c ";
-                conditionalHql.append(" and c.id in (:courseIds) ");
-            }
-            hql+=" where";            
-            if (Validate.exists(name)) {
-                conditionalHql.append(" and user.name = :argName ");
-            }
-            if (Validate.exists(surname)) {
-                conditionalHql.append(" and user.surname = :argSurname ");
-            }
-           
-            if (titleIds != null) {
-                conditionalHql.append(" and user.title.id in (:titleIds) ");
-            }
-            if(demonstratorsOnly) {
-               conditionalHql.append(" and user.title.name = :demoName "); 
-            }
-            //izbaci prvi and
-            hql += conditionalHql.substring(4, conditionalHql.length()) + " group by user.id ";
-        }
-        
-        Query query = HibernateUtil.createHqlQuery(hql);
         if (Validate.exists(name)) {
-            query.setString("argName", name);
+            criteria.add(Restrictions.eq("name", name));
         }
         if (Validate.exists(surname)) {
-            query.setString("argSurname", surname);
-        }
-        if (courseIds != null) {
-            query.setParameterList("courseIds", stringArrayToIntegerList(courseIds));
+            criteria.add(Restrictions.eq("surname", surname));
         }
         if (titleIds != null) {
-            query.setParameterList("titleIds", stringArrayToIntegerList(titleIds));
+            criteria.add(Restrictions.in("t.id", ConversionUtils.stringArrayToIntegerList(courseIds)));
         }
-        if(demonstratorsOnly) {
-          query.setString("demoName", Title.DEMONSTRATOR);  
+        if (courseIds != null) {
+            criteria.add(Restrictions.in("c.id", ConversionUtils.stringArrayToIntegerList(courseIds)));
         }
-        return query.list();
+        if (demonstratorsOnly) {
+            criteria.add(Restrictions.eq("t.name", Title.DEMONSTRATOR));
+        }
+
+        //dodavanje klauzule distinct
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+
+        return (List<User>) criteria.list();
     }
+
+    //kada ne bi postojao Criteria API u alatu Hibernate
+    //morao bi se konstruisati peške ovaj ružan kod
+
+    /*   public static List<User> find(String name, String surname, String[] titleIds,
+     String[] courseIds, boolean demonstratorsOnly) {
+
+     boolean allEmpty = !Validate.exists(name) && !Validate.exists(surname)
+     && courseIds == null && titleIds == null;
+     String hql = "select user from User user ";
+
+     if (!allEmpty) {
+     StringBuilder conditionalHql = new StringBuilder();
+     if (courseIds != null) {
+     hql += " join user.courses c ";
+     conditionalHql.append(" and c.id in (:courseIds) ");
+     }
+     hql+=" where";
+     if (Validate.exists(name)) {
+     conditionalHql.append(" and user.name = :argName ");
+     }
+     if (Validate.exists(surname)) {
+     conditionalHql.append(" and user.surname = :argSurname ");
+     }
+
+     if (titleIds != null) {
+     conditionalHql.append(" and user.title.id in (:titleIds) ");
+     }
+     if(demonstratorsOnly) {
+     conditionalHql.append(" and user.title.name = :demoName ");
+     }
+     //izbaci prvi and
+     hql += conditionalHql.substring(4, conditionalHql.length()) + " group by user.id ";
+     }
+
+     Query query = HibernateUtil.createHqlQuery(hql);
+     if (Validate.exists(name)) {
+     query.setString("argName", name);
+     }
+     if (Validate.exists(surname)) {
+     query.setString("argSurname", surname);
+     }
+     if (courseIds != null) {
+     query.setParameterList("courseIds", stringArrayToIntegerList(courseIds));
+     }
+     if (titleIds != null) {
+     query.setParameterList("titleIds", stringArrayToIntegerList(titleIds));
+     }
+     if(demonstratorsOnly) {
+     query.setString("demoName", Title.DEMONSTRATOR);
+     }
+     return query.list();
+     } */
 
     //demonstratori koji se mogu pozvati za vežbu
     public static List<User> getAvailableDemonstratorsForExercise(Exercise exercise) {
@@ -314,13 +349,5 @@ public class User {
         query.setEntity("argExercise", exercise);
         return query.list();
     }
-    
-    private static List<Integer> stringArrayToIntegerList(String[] stringArray) {
-        List<Integer> integerList = new ArrayList<Integer>(stringArray.length);
-        for (String s : stringArray) { 
-            integerList.add(Integer.valueOf(s)); 
-        }
-        return integerList;
-    }
-    
+
 }
