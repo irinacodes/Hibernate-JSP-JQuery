@@ -83,5 +83,10 @@ public class HibernateUtil {
        Session session = sessionFactory.getCurrentSession();
        return session.createQuery(hql); 
     }
+    
+     public static Criteria createCriteria(Class clazz) {
+        Session session = sessionFactory.getCurrentSession();
+        return session.createCriteria(clazz);
+    }
 
 }
